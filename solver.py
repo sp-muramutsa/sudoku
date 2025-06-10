@@ -5,10 +5,13 @@ from collections import deque
 class SudokuSolver:
     def __init__(self, sudoku: Sudoku):
         """
-        Represents a Sudoku as a CSP
-        - VARIABLES, X: each one of the 81 cells.
-        - Domains: 1-9 for an empty cell, i for a filled cell with i
-        - CONSTRAINTS: row, column, and diagonal Validity
+        Represents a Sudoku puzzle as a Constraint Satisfaction Problem (CSP):
+        - VARIABLES (X): Each of the 81 cells on the board.
+        - DOMAINS: For empty cells, possible values are 1-9; for filled cells, the domain is the assigned value.
+        - CONSTRAINTS: Each assigned value must satisfy Sudoku rules:
+          * Row constraint: No duplicate numbers in the same row.
+          * Column constraint: No duplicate numbers in the same column.
+          * Diagonal constraint: No duplicate numbers in any of the nine 3x3 regiond.
         """
 
         self.sudoku = sudoku
@@ -35,9 +38,48 @@ class SudokuSolver:
                 self.arcs.append((variable, neighbor))
 
     def get_domain(self, cell: tuple) -> set:
+        """Returns the current domain of the given cell (variable)."""
         return self.domain[cell]
 
-    def REVISE(self, x, y) -> bool:
+    def is_complete_assignment(self, assignment: dict) -> bool:
+        """
+        Checks if an assignment is complete i.e. each cell is mapped to one value and the board is solved.
+        """
+        temp_sudoku = Sudoku()
+        if not assignment:
+            return False
+
+        for variable, value in assignment.items():
+            row, col = variable
+
+            if len(value) != 1:
+                return False
+
+            temp_sudoku.board[row][col] = list(value)[0]
+
+        return temp_sudoku.is_solved()
+
+    def is_value_consistent(
+        self, variable: tuple, value: int, assignment: dict
+    ) -> bool:
+        """
+        Checks if the value is not assigned to any of the variable's neighbors in the assignment.
+        """
+        neighbors = self.sudoku.get_neighbors(variable)
+
+        for neighbor in neighbors:
+            if neighbor in assignment:
+                if len(assignment[neighbor]) == 1 and value in assignment[neighbor]:
+                    return False
+
+        return True
+
+    def REVISE(self, x: tuple, y: tuple) -> bool:
+        """
+        Revise the domain of variable x with respect to variable y.
+        Removes values from domain[x] that have no compatible values in domain[y].
+        Returns True if domain[x] was revised, False otherwise.
+        """
         domain_X, domain_Y = self.get_domain(x), self.get_domain(y)
         revised = False
         for value in domain_X.copy():
@@ -49,6 +91,10 @@ class SudokuSolver:
         return revised
 
     def AC3(self) -> bool:
+        """
+        AC3 algorithm enforcing arc consistency on all arcs.
+        Returns True if arc consistency is achieved without empty domains; False otherwise.
+        """
         queue = deque(self.arcs)
 
         while queue:
@@ -64,46 +110,70 @@ class SudokuSolver:
 
         return True
 
-    def BACKTRACKING_SEARCH(self):
-        return self.BACKTRACK(dict())
-
-    def is_complete_assignment(self, assignment: dict):
+    def INFERENCE(self) -> bool:
         """
-        Checks if an assignment is complete i.e. each cell is mapped to one value and the board is solved.
+        Performs inference by calling the AC3 algorithm.
         """
+        return self.AC3()
 
-        temp_sudoku = Sudoku()
-        if not assignment:
-            return False
-
-        for variable, value in assignment.items():
-            row, col = variable
-
-            if len(value) != 1:
-                return False
-
-            temp_sudoku.board[row][col] = list(value)[0]
-
-        return temp_sudoku.is_solved()
-
-    def is_value_consistent(self, variable: tuple, value: int, assignment: dict):
+    def SELECT_UNASSIGNED_VARIABLE(self, assignment: dict) -> tuple:
         """
-        value is not assigned to any of the neighbors
+        Selects an unassigned variable using MRV heuristic.
         """
-        neighbors = self.sudoku.get_neighbors(variable)
+        mrv_variable = self.MRV(assignment)
+        return mrv_variable
 
-        for neighbor in neighbors:
-            if neighbor in assignment:
-                if len(assignment[neighbor]) == 1 and value in assignment[neighbor]:
-                    return False
+    def MRV(self, assignment: dict) -> tuple:
+        """
+        Minimum Remaining Values heuristic: selects the variable with the smallest domain.
+        """
+        mrv_count, mrv_variable = float("inf"), None
 
-        return True
+        for variable in self.VARIABLES:
+
+            if variable in assignment:
+                continue
+
+            domain_size = len(self.get_domain(variable))
+            if domain_size < mrv_count:
+                mrv_count, mrv_variable = domain_size, variable
+
+        return mrv_variable
+
+    def LSV(self, variable: tuple, assignment: dict) -> list:
+        """
+        Least Constraining Value heuristic: orders values by how few constraints they impose on neighbors.
+        """
+        counter = {value: 0 for value in self.get_domain(variable)}
+
+        for var, values in assignment.items():
+            for value in values:
+                if value in counter:
+                    counter[value] += 1
+
+        lcv_sorted = dict(sorted(counter.items(), key=lambda x: x[1]))
+
+        return list(lcv_sorted.keys())
+
+    def DEGREE(self):
+        """
+        Degree heuristic placeholder.
+        Not applicable in this case as all nodes have the same level of degree = 20
+        """
+        pass
+
+    def ORDERED_DOMAIN_VALUES(self, variable: tuple, assignment: dict) -> list:
+        """
+        Returns domain values ordered by the LSV heuristic.
+        """
+        values = self.LSV(variable, assignment)
+        return values
 
     def BACKTRACK(self, assignment: dict):
         """
-        Classical backtrack algorithm
+        Classical backtracking search algorithm.
+        Returns a complete assignment if successful, otherwise False.
         """
-
         if self.is_complete_assignment(assignment):
             return assignment
 
@@ -122,61 +192,25 @@ class SudokuSolver:
                     if result:
                         return result
 
-                # remove {var = value} from assingment
+                # remove {var = value} from assignment
                 assignment.pop(variable)
 
-                # Remove assignments
+                # Restore domains
                 self.domain = saved_domains
 
         return False
 
-    def INFERENCE(self):
+    def BACKTRACKING_SEARCH(self):
         """
-        calls arc consistency
+        Initiates backtracking search with an empty assignment.
         """
-        return self.AC3()
-
-    def SELECT_UNASSIGNED_VARIABLE(self, assignment):
-        mrv_variable = self.MRV(assignment)
-        return mrv_variable
-
-    def MRV(self, assignment: dict):
-        mrv_count, mrv_variable = float("inf"), None
-
-        for variable in self.VARIABLES:
-
-            if variable in assignment:
-                continue
-
-            domain_size = len(self.get_domain(variable))
-            if domain_size < mrv_count:
-                mrv_count, mrv_variable = domain_size, variable
-
-        return mrv_variable
-
-    def LSV(self, variable, assignment: dict):
-        counter = {value: 0 for value in self.get_domain(variable)}
-
-        for var, values in assignment.items():
-            for value in values:
-                if value in counter:
-                    counter[value] += 1
-
-        lcv_sorted = dict(sorted(counter.items(), key=lambda x: x[1]))
-
-        return list(lcv_sorted.keys())
-
-    def DEGREE(self):
-        """
-        Not applicable in this case as all nodes have the same level of degree = 20
-        """
-        pass
-
-    def ORDERED_DOMAIN_VALUES(self, variable, assignment: dict):
-        values = self.LSV(variable, assignment)
-        return values
+        return self.BACKTRACK(dict())
 
     def solve(self):
+        """
+        Attempts to solve the Sudoku puzzle using AC3 and backtracking search.
+        Prints the solution if found.
+        """
         if not self.sudoku.is_valid():
             print("This algorithm doesn't support invalid Sudoku puzzles.")
             return

@@ -1,32 +1,38 @@
 class Sudoku:
     """
-    Represents a Sudoku board as a 9x9 2D Matrix.
+    Represents a 9x9 Sudoku board as a 2D Matrix.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        Initializes the Sudoku board with all cells empty (0).
+        Also initializes the list of cell coordinates.
+        """
         self.cells = [(i, j) for j in range(9) for i in range(9)]
         self.board = [[0] * 9 for _ in range(9)]
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Returns a string representation of the Sudoku board.
+        """
         sudoku = "\n"
         for row in self.board:
             sudoku += "["
             sudoku += ", ".join(str(cell) for cell in row)
             sudoku += "]\n"
         sudoku += ""
-
         return sudoku
 
     def get_rows(self) -> list:
         """
-        Returns the rows
+        Returns the rows of the Sudoku board as a list of lists.
         """
         rows = [row for row in self.board]
         return rows
 
     def get_columns(self) -> list:
         """
-        Returns the columns
+        Returns the columns of the Sudoku board as a list of lists.
         """
         rows = self.get_rows()
         columns = []
@@ -39,11 +45,10 @@ class Sudoku:
 
         return columns
 
-    def get_regions(self):
+    def get_regions(self) -> list:
         """
-        Returns a valid 3x3 region
+        Returns the 3x3 regions (sub-grids) of the Sudoku board as a list of lists.
         """
-
         regions = []
         for row_bound in range(0, 9, 3):
             for col_bound in range(0, 9, 3):
@@ -55,7 +60,11 @@ class Sudoku:
 
         return regions
 
-    def valid(self, area: list):
+    def valid(self, area: list) -> bool:
+        """
+        Checks if the provided list of lists (area) contains no duplicates except 0.
+        Returns True if valid, False otherwise.
+        """
         for sub_area in area:
             seen = set()
             for cell in sub_area:
@@ -66,15 +75,22 @@ class Sudoku:
                 seen.add(cell)
         return True
 
-    def is_valid(self):
-
+    def is_valid(self) -> bool:
+        """
+        Checks whether the entire Sudoku board is valid by validating
+        rows, columns, and 3x3 regions.
+        """
         return (
             self.valid(self.get_rows())
             and self.valid(self.get_columns())
             and self.valid(self.get_regions())
         )
 
-    def is_solved(self):
+    def is_solved(self) -> bool:
+        """
+        Returns True if the Sudoku board is completely filled with no zeros
+        and is valid; False otherwise.
+        """
         zero_count = 0
         rows = self.get_rows()
         for row in rows:
@@ -82,7 +98,11 @@ class Sudoku:
 
         return zero_count == 0 and self.is_valid()
 
-    def get_neighbors(self, cell: tuple) -> set:
+    def get_neighbors(self, cell: tuple[int, int]) -> set[tuple[int, int]]:
+        """
+        Returns the set of neighboring cells (row, column, and 3x3 box neighbors)
+        for a given cell coordinate (row, col).
+        """
         row, col = cell
         neighbors = set()
 
@@ -100,30 +120,8 @@ class Sudoku:
         row_start, col_start = 3 * (row // 3), 3 * (col // 3)
         for i in range(row_start, row_start + 3):
             for j in range(col_start, col_start + 3):
-
                 if i == row and j == col:
                     continue
-
                 neighbors.add((i, j))
 
         return neighbors
-
-    def generate(self, n):
-        """
-        Generates a Sudoku board with n empty cells
-        """
-        pass
-
-
-s = Sudoku()
-s.board = [
-    [0, 0, 3, 0, 2, 0, 6, 0, 0],
-    [9, 0, 0, 3, 0, 5, 0, 0, 1],
-    [0, 0, 1, 8, 0, 6, 4, 0, 0],
-    [0, 0, 8, 1, 0, 2, 9, 0, 0],
-    [7, 0, 0, 0, 0, 0, 0, 0, 8],
-    [0, 0, 6, 7, 0, 8, 2, 0, 0],
-    [0, 0, 2, 6, 0, 9, 5, 0, 0],
-    [8, 0, 0, 2, 0, 3, 0, 0, 9],
-    [0, 0, 5, 0, 1, 0, 3, 0, 0],
-]
