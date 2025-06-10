@@ -24,6 +24,13 @@ class SudokuSolver:
         self.create_graph()
         self.enforce_node_consistency()
 
+    def create_graph(self):
+        # Represent arcs i.e. mapping each variable to its neighbors
+        for variable in self.VARIABLES:
+            neighbors = self.sudoku.get_neighbors(variable)
+            for neighbor in neighbors:
+                self.arcs.append((variable, neighbor))
+
     def enforce_node_consistency(self):
         # Assign each variable its domain
         for variable in self.VARIABLES:
@@ -34,13 +41,6 @@ class SudokuSolver:
             # Filled cell
             else:
                 self.domain[variable] = {self.sudoku.board[row][col]}
-
-    def create_graph(self):
-        # Represent arcs i.e. mapping each variable to its neighbors
-        for variable in self.VARIABLES:
-            neighbors = self.sudoku.get_neighbors(variable)
-            for neighbor in neighbors:
-                self.arcs.append((variable, neighbor))
 
     def get_domain(self, cell: tuple) -> set:
         """Returns the current domain of the given cell (variable)."""
