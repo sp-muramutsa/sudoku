@@ -21,6 +21,10 @@ class SudokuSolver:
         self.arcs = []
         self.solution = None
 
+        self.create_graph()
+        self.enforce_node_consistency()
+
+    def enforce_node_consistency(self):
         # Assign each variable its domain
         for variable in self.VARIABLES:
             row, col = variable
@@ -31,9 +35,10 @@ class SudokuSolver:
             else:
                 self.domain[variable] = {self.sudoku.board[row][col]}
 
+    def create_graph(self):
         # Represent arcs i.e. mapping each variable to its neighbors
         for variable in self.VARIABLES:
-            neighbors = sudoku.get_neighbors(variable)
+            neighbors = self.sudoku.get_neighbors(variable)
             for neighbor in neighbors:
                 self.arcs.append((variable, neighbor))
 
