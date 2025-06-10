@@ -59,6 +59,16 @@ See ```runner.py```
 
 ---
 
+## Reference
+> Russell, S., & Norvig, P. (2020). *Artificial Intelligence: A Modern Approach* (4th ed.). Pearson.
+>
+> * **Chapter 6**: Local Search and Optimization
+---
+
+Would you like me to help you embed this reference inside your code docstrings or in the README?
+
+---
+
 ## Contributing
 Contributions for performance improvements, GUI integration, or support for variant puzzles (e.g., Sudoku-X with diagonal constraints) are welcome. Please fork the repository, create a feature branch, and submit a pull request.
 
