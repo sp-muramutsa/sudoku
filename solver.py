@@ -231,4 +231,5 @@ class SudokuSolver:
             row, col = variable
             self.sudoku.board[row][col] = value.pop()
 
+        self.solution = self.sudoku.board
         print(self.sudoku, end="\n")
