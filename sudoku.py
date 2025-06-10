@@ -5,7 +5,7 @@ class Sudoku:
 
     def __init__(self):
         self.cells = [(i, j) for j in range(9) for i in range(9)]
-        self.board = []
+        self.board = [[0] * 9 for _ in range(9)]
 
     def __str__(self):
         sudoku = "\n"
@@ -65,7 +65,7 @@ class Sudoku:
                     return False
                 seen.add(cell)
         return True
-    
+
     def is_valid(self):
 
         return (
@@ -83,14 +83,14 @@ class Sudoku:
         return zero_count == 0 and self.is_valid()
 
     def get_neighbors(self, cell: tuple) -> set:
-        row, col = cell   
+        row, col = cell
         neighbors = set()
 
         # Same row
         for j in range(9):
             if j != col:
                 neighbors.add((row, j))
-        
+
         # Same column
         for i in range(9):
             if i != row:
@@ -127,4 +127,3 @@ s.board = [
     [8, 0, 0, 2, 0, 3, 0, 0, 9],
     [0, 0, 5, 0, 1, 0, 3, 0, 0],
 ]
-
