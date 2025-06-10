@@ -68,6 +68,6 @@ Contributions for performance improvements, GUI integration, or support for vari
 ## Contact
 For questions or collaboration inquiries, please contact:
 
-**Author:** \Sandrin Muramutsa
+**Author:** Sandrin Muramutsa
 
 
