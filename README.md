@@ -60,9 +60,9 @@ See ```runner.py```
 ---
 
 ## Reference
-> Russell, S., & Norvig, P. (2020). *Artificial Intelligence: A Modern Approach* (4th ed.). Pearson.
+> Russell, S., & Norvig, P. (2009). *Artificial Intelligence: A Modern Approach* (3rd ed.). Pearson.
 >
-> * **Chapter 6**: Local Search and Optimization
+> * **Chapter 6**: Constraint Satisfaction Problems
 ---
 
 Would you like me to help you embed this reference inside your code docstrings or in the README?
